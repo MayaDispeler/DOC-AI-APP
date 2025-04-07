@@ -405,7 +405,7 @@ with tab1:
         st.session_state.document_processed = False
         st.session_state.chat_history = []
         st.session_state.current_doc = None
-        st.experimental_rerun()
+        st.rerun()
         
     # Free Version UI
     if not pdf:
@@ -630,7 +630,7 @@ with tab2:
         st.session_state.document_processed = False
         st.session_state.chat_history = []
         st.session_state.current_doc = None
-        st.experimental_rerun()
+        st.rerun()
         
     # Paid Version UI - original code
     if not pdf:
