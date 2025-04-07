@@ -1,0 +1,8 @@
+streamlit
+langchain
+pypdf2
+python-dotenv
+openai
+anthropic  # For Claude
+litellm    # Unified API for 100+ LLMs
+faiss-cpu
