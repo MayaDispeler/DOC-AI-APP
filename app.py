@@ -172,7 +172,6 @@ with st.sidebar:
             "Mistral": "https://console.mistral.ai/api-keys"
         }
         return urls.get(provider, "")
-    
     if st.button("❓ Get API Key"):
         st.markdown(f"[Click here to get your {provider} API key]({get_provider_url(provider)})")
     
@@ -217,7 +216,7 @@ if not pdf:
     
     with col1:
         # Fix deprecated parameter
-        st.image("4df86729-204b-41a8-9e28-6cb8bbc16737.png", use_container_width=True)
+        st.image("image.png", use_container_width=True)
     
     with col2:
         st.markdown("""
