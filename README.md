@@ -111,4 +111,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Built with [Streamlit](https://streamlit.io/)
 - Powered by [LangChain](https://langchain.org/)
-- Vector search by [FAISS](https://github.com/facebookresearch/faiss) 
+- Vector search by [FAISS](https://github.com/facebookresearch/faiss)
