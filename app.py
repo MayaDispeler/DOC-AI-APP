@@ -178,6 +178,10 @@ if 'current_doc' not in st.session_state:
     st.session_state.current_doc = None
 if 'current_mode' not in st.session_state:
     st.session_state.current_mode = "paid"
+if 'last_mode' not in st.session_state:
+    st.session_state.last_mode = None
+if 'needs_rerun' not in st.session_state:
+    st.session_state.needs_rerun = False
     
 # ======================
 # HELPER FUNCTIONS
@@ -400,11 +404,18 @@ tab1, tab2 = st.tabs([
 with tab1:
     # Set the current mode when this tab is viewed
     if st.session_state.current_mode != "free":
+        st.session_state.last_mode = st.session_state.current_mode
         st.session_state.current_mode = "free"
         st.session_state.vector_store = None
         st.session_state.document_processed = False
         st.session_state.chat_history = []
         st.session_state.current_doc = None
+        st.session_state.needs_rerun = True
+    
+    # Only rerun if necessary and we haven't already done so
+    if st.session_state.needs_rerun and st.session_state.last_mode != st.session_state.current_mode:
+        st.session_state.needs_rerun = False
+        st.session_state.last_mode = st.session_state.current_mode
         st.rerun()
         
     # Free Version UI
@@ -614,8 +625,8 @@ with tab1:
                         "source": result.get("source_text", "")
                     })
                     
-                    # Rerun to update the chat display
-                    st.rerun()
+                    # No need to rerun here as Streamlit will automatically update
+                    # the chat display with the new message
                     
                 except Exception as e:
                     st.error(f"⚠️ Error: {str(e)}. Please check your inputs and try again.")
@@ -625,11 +636,18 @@ with tab1:
 with tab2:
     # Set the current mode when this tab is viewed
     if st.session_state.current_mode != "paid":
+        st.session_state.last_mode = st.session_state.current_mode
         st.session_state.current_mode = "paid"
         st.session_state.vector_store = None
         st.session_state.document_processed = False
         st.session_state.chat_history = []
         st.session_state.current_doc = None
+        st.session_state.needs_rerun = True
+    
+    # Only rerun if necessary and we haven't already done so
+    if st.session_state.needs_rerun and st.session_state.last_mode != st.session_state.current_mode:
+        st.session_state.needs_rerun = False
+        st.session_state.last_mode = st.session_state.current_mode
         st.rerun()
         
     # Paid Version UI - original code
@@ -827,8 +845,8 @@ with tab2:
                         "source": result.get("source_text", "")
                     })
                     
-                    # Rerun to update the chat display
-                    st.rerun()
+                    # No need to rerun here as Streamlit will automatically update
+                    # the chat display with the new message
                     
                 except Exception as e:
                     st.error(f"⚠️ Error: {str(e)}. Please check your API key and try again.")
