@@ -11,7 +11,8 @@ from streamlit_extras.colored_header import colored_header
 from streamlit_extras.add_vertical_space import add_vertical_space
 import os
 from datetime import datetime
-from pdf2image import convert_from_bytes
+import pdf2image
+from pdf2image import convert_from_path
 import tempfile
 from PIL import Image
 import io
@@ -209,39 +210,42 @@ with st.sidebar:
         ), unsafe_allow_html=True)
         
         try:
-            # Convert first two pages to images
-            pdf_bytes = pdf.read()
-            images = convert_from_bytes(pdf_bytes, first_page=1, last_page=2)
-            
-            # Create a container for the preview
-            st.markdown("""
-            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                <h4 style="color: #2c3e50; margin-bottom: 0.5rem;">Preview</h4>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Display each page
-            for i, image in enumerate(images):
-                # Convert PIL image to bytes
-                img_byte_arr = io.BytesIO()
-                image.save(img_byte_arr, format='PNG')
-                img_byte_arr = img_byte_arr.getvalue()
-                
-                # Display image with page number
-                st.image(img_byte_arr, caption=f"Page {i+1}", use_column_width=True)
-                
-                # Add a subtle separator between pages
-                if i < len(images) - 1:
-                    st.markdown("<hr style='margin: 0.5rem 0; border: 0.5px solid #e0e3e9;'>", unsafe_allow_html=True)
-            
-            # Show total page count
-            pdf_reader = PdfReader(pdf)
-            page_count = len(pdf_reader.pages)
-            st.markdown(f"""
-            <div style="background-color: #f8f9fa; padding: 0.75rem; border-radius: 8px; text-align: center; margin-top: 1rem;">
-                <span style="color: #666; font-size: 0.9rem;">📑 Showing 2 of {page_count} pages</span>
-            </div>
-            """, unsafe_allow_html=True)
+            # Add Poppler path for macOS
+            POPPLER_PATH = '/opt/homebrew/bin'  # Homebrew installation path for macOS
+
+            def get_pdf_preview(pdf_file):
+                try:
+                    # Create a temporary file to save the uploaded PDF
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+                        tmp_file.write(pdf_file.getvalue())
+                        tmp_file_path = tmp_file.name
+                    
+                    try:
+                        # Convert first two pages to images
+                        images = convert_from_path(
+                            tmp_file_path,
+                            first_page=1,
+                            last_page=2,
+                            poppler_path=POPPLER_PATH
+                        )
+                        
+                        # Display images with page numbers
+                        for i, image in enumerate(images, 1):
+                            st.image(image, caption=f'Page {i}', use_column_width=True)
+                            
+                        # Get total page count
+                        reader = PdfReader(pdf_file)
+                        total_pages = len(reader.pages)
+                        st.markdown(f"<p style='color: #666; font-size: 0.9em;'>Total pages: {total_pages}</p>", unsafe_allow_html=True)
+                        
+                    finally:
+                        # Clean up the temporary file
+                        os.unlink(tmp_file_path)
+                    
+                except Exception as e:
+                    st.error(f"Could not generate preview: {str(e)}")
+
+            get_pdf_preview(pdf)
             
         except Exception as e:
             st.error(f"⚠️ Could not generate preview: {str(e)}")
