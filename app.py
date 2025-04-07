@@ -204,62 +204,67 @@ with st.sidebar:
 # MAIN CONTENT AREA
 # ======================
 if not pdf:
-    st.markdown("### 👋 Welcome to AI Document Assistant!")
+    # Create a clean, modern welcome page with local image
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: #1E88E5; font-size: 2.5rem; margin-bottom: 1rem;">📄 AI Document Assistant</h1>
+        <p style="font-size: 1.2rem; color: #444654; margin-bottom: 2rem;">Your intelligent companion for document analysis and exploration</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Create a modern welcome interface
-    col1, col2 = st.columns([2, 1])
+    # Use columns for better layout
+    col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.markdown("""
-        This intelligent assistant helps you analyze PDF documents using state-of-the-art AI models.
-        
-        #### 🌟 Key Features
-        - 📚 Upload and analyze any PDF document
-        - 🤖 Choose from multiple AI providers
-        - 💬 Natural conversation interface
-        - 🔍 Smart document search
-        - 📊 Structured information extraction
-        
-        #### 🚀 Get Started
-        1. Select your preferred AI provider in the sidebar
-        2. Enter your API key
-        3. Upload a PDF document
-        4. Start asking questions!
-        """)
+        # Add local image with better styling
+        st.image("4df86729-204b-41a8-9e28-6cb8bbc16737.png", use_column_width=True)
     
     with col2:
         st.markdown("""
-        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin-top: 20px;">
-            <h4 style="color: #0e1117; margin-bottom: 15px;">💡 Example Questions</h4>
-            <ul style="color: #444654;">
-                <li>Summarize the main points</li>
-                <li>List key findings</li>
-                <li>Extract important dates</li>
-                <li>Find specific information</li>
-                <li>Analyze trends</li>
-            </ul>
+        <div style="background-color: #f8f9fa; padding: 1.5rem; border-radius: 10px; border-left: 5px solid #1E88E5;">
+            <h3 style="color: #1E88E5; margin-bottom: 1rem;">🚀 How It Works</h3>
+            <ol style="margin-left: 1rem; font-size: 1rem; color: #444654;">
+                <li><strong>Select AI Provider</strong> from the sidebar</li>
+                <li><strong>Enter API Key</strong> for chosen provider</li>
+                <li><strong>Upload PDF Document</strong> for analysis</li>
+                <li><strong>Ask Questions</strong> about the document</li>
+            </ol>
         </div>
         """, unsafe_allow_html=True)
     
-    # Add a visual separator
-    st.markdown("---")
+    # Add feature section
+    st.markdown("<hr style='margin: 2rem 0;'>", unsafe_allow_html=True)
+    st.markdown("""
+    <h3 style="color: #1E88E5; margin-bottom: 1rem; text-align: center;">✨ Key Features</h3>
+    """, unsafe_allow_html=True)
     
-    # Add feature highlights
-    st.markdown("#### ✨ Supported AI Models")
-    providers = {
-        "OpenAI GPT-4": "Latest and most capable model",
-        "Claude": "Excellent for analysis",
-        "DeepSeek": "Strong reasoning abilities",
-        "Groq": "Ultra-fast responses",
-        "Mistral": "Open-source excellence"
-    }
+    # Create three columns for features
+    feat1, feat2, feat3 = st.columns(3)
     
-    cols = st.columns(len(providers))
-    for col, (provider, desc) in zip(cols, providers.items()):
-        col.markdown(f"""
-        <div style="background-color: white; padding: 15px; border-radius: 10px; border: 1px solid #e0e3e9; height: 100px; text-align: center;">
-            <h5 style="color: #0e1117; margin-bottom: 10px;">{provider}</h5>
-            <p style="color: #666; font-size: 0.9em;">{desc}</p>
+    with feat1:
+        st.markdown("""
+        <div style="background-color: white; padding: 1.5rem; border-radius: 10px; height: 170px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
+            <h4 style="margin-bottom: 0.5rem;">Smart Analysis</h4>
+            <p style="color: #666; font-size: 0.9rem;">Extract insights and understand document content with AI precision</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with feat2:
+        st.markdown("""
+        <div style="background-color: white; padding: 1.5rem; border-radius: 10px; height: 170px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
+            <h4 style="margin-bottom: 0.5rem;">Natural Conversation</h4>
+            <p style="color: #666; font-size: 0.9rem;">Interact with documents using simple, conversational language</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with feat3:
+        st.markdown("""
+        <div style="background-color: white; padding: 1.5rem; border-radius: 10px; height: 170px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔒</div>
+            <h4 style="margin-bottom: 0.5rem;">Secure Processing</h4>
+            <p style="color: #666; font-size: 0.9rem;">Your documents and API keys never leave your session</p>
         </div>
         """, unsafe_allow_html=True)
 
