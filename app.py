@@ -213,17 +213,17 @@ if not pdf:
     """, unsafe_allow_html=True)
     
     # Use columns for better layout
-    col1, col2 = st.columns([3, 2])
+    col1, col2 = st.columns([3, 2], gap="large")
     
     with col1:
-        # Add local image with better styling
-        st.image("4df86729-204b-41a8-9e28-6cb8bbc16737.png", use_column_width=True)
+        # Fix deprecated parameter
+        st.image("4df86729-204b-41a8-9e28-6cb8bbc16737.png", use_container_width=True)
     
     with col2:
         st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 1.5rem; border-radius: 10px; border-left: 5px solid #1E88E5;">
-            <h3 style="color: #1E88E5; margin-bottom: 1rem;">🚀 How It Works</h3>
-            <ol style="margin-left: 1rem; font-size: 1rem; color: #444654;">
+        <div style="background-color: #f8f9fa; padding: 1.5rem; border-radius: 10px; border-left: 5px solid #1E88E5; height: 100%;">
+            <h3 style="color: #1E88E5; margin-bottom: 1.5rem;">🚀 How It Works</h3>
+            <ol style="margin-left: 1rem; font-size: 1rem; color: #444654; line-height: 1.8;">
                 <li><strong>Select AI Provider</strong> from the sidebar</li>
                 <li><strong>Enter API Key</strong> for chosen provider</li>
                 <li><strong>Upload PDF Document</strong> for analysis</li>
@@ -232,41 +232,57 @@ if not pdf:
         </div>
         """, unsafe_allow_html=True)
     
-    # Add feature section
-    st.markdown("<hr style='margin: 2rem 0;'>", unsafe_allow_html=True)
+    # Add feature section with better spacing
+    st.markdown("<hr style='margin: 2.5rem 0; opacity: 0.3;'>", unsafe_allow_html=True)
     st.markdown("""
-    <h3 style="color: #1E88E5; margin-bottom: 1rem; text-align: center;">✨ Key Features</h3>
+    <h3 style="color: #1E88E5; margin-bottom: 1.5rem; text-align: center;">✨ Key Features</h3>
     """, unsafe_allow_html=True)
     
-    # Create three columns for features
-    feat1, feat2, feat3 = st.columns(3)
+    # Create three columns with proper spacing
+    feature_cols = st.columns(3, gap="medium")
     
-    with feat1:
-        st.markdown("""
-        <div style="background-color: white; padding: 1.5rem; border-radius: 10px; height: 170px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
-            <h4 style="margin-bottom: 0.5rem;">Smart Analysis</h4>
-            <p style="color: #666; font-size: 0.9rem;">Extract insights and understand document content with AI precision</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with feat2:
-        st.markdown("""
-        <div style="background-color: white; padding: 1.5rem; border-radius: 10px; height: 170px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
-            <h4 style="margin-bottom: 0.5rem;">Natural Conversation</h4>
-            <p style="color: #666; font-size: 0.9rem;">Interact with documents using simple, conversational language</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with feat3:
-        st.markdown("""
-        <div style="background-color: white; padding: 1.5rem; border-radius: 10px; height: 170px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔒</div>
-            <h4 style="margin-bottom: 0.5rem;">Secure Processing</h4>
-            <p style="color: #666; font-size: 0.9rem;">Your documents and API keys never leave your session</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Define feature card style for consistency
+    card_style = """
+    background-color: white; 
+    padding: 1.5rem; 
+    border-radius: 12px; 
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    """
+    
+    # Feature Cards with consistent styling
+    features = [
+        {
+            "icon": "🔍",
+            "title": "Smart Analysis",
+            "description": "Extract insights and understand document content with AI precision"
+        },
+        {
+            "icon": "💬",
+            "title": "Natural Conversation",
+            "description": "Interact with documents using simple, conversational language"
+        },
+        {
+            "icon": "🔒",
+            "title": "Secure Processing",
+            "description": "Your documents and API keys never leave your session"
+        }
+    ]
+    
+    # Render feature cards with consistent structure
+    for i, feature in enumerate(features):
+        with feature_cols[i]:
+            st.markdown(f"""
+            <div style="{card_style}">
+                <div style="font-size: 2.2rem; margin-bottom: 1rem;">{feature["icon"]}</div>
+                <h4 style="margin-bottom: 1rem; color: #2c3e50;">{feature["title"]}</h4>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.5;">{feature["description"]}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
 elif pdf and api_key:
     # Reset vector store if new document is uploaded
