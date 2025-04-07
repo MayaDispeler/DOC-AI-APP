@@ -205,17 +205,63 @@ with st.sidebar:
 # ======================
 if not pdf:
     st.markdown("### 👋 Welcome to AI Document Assistant!")
-    st.markdown("""
-    This app helps you analyze and chat about PDF documents using advanced AI.
     
-    To get started:
-    1. Select your preferred AI provider in the sidebar
-    2. Enter your API key
-    3. Upload a PDF document
+    # Create a modern welcome interface
+    col1, col2 = st.columns([2, 1])
     
-    The AI will help you understand and analyze the document's content through natural conversation.
-    """)
-    st.image("https://raw.githubusercontent.com/streamlit/docs/main/public/images/api-examples-docs-chat.png", caption="Example Chat Interface")
+    with col1:
+        st.markdown("""
+        This intelligent assistant helps you analyze PDF documents using state-of-the-art AI models.
+        
+        #### 🌟 Key Features
+        - 📚 Upload and analyze any PDF document
+        - 🤖 Choose from multiple AI providers
+        - 💬 Natural conversation interface
+        - 🔍 Smart document search
+        - 📊 Structured information extraction
+        
+        #### 🚀 Get Started
+        1. Select your preferred AI provider in the sidebar
+        2. Enter your API key
+        3. Upload a PDF document
+        4. Start asking questions!
+        """)
+    
+    with col2:
+        st.markdown("""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin-top: 20px;">
+            <h4 style="color: #0e1117; margin-bottom: 15px;">💡 Example Questions</h4>
+            <ul style="color: #444654;">
+                <li>Summarize the main points</li>
+                <li>List key findings</li>
+                <li>Extract important dates</li>
+                <li>Find specific information</li>
+                <li>Analyze trends</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Add a visual separator
+    st.markdown("---")
+    
+    # Add feature highlights
+    st.markdown("#### ✨ Supported AI Models")
+    providers = {
+        "OpenAI GPT-4": "Latest and most capable model",
+        "Claude": "Excellent for analysis",
+        "DeepSeek": "Strong reasoning abilities",
+        "Groq": "Ultra-fast responses",
+        "Mistral": "Open-source excellence"
+    }
+    
+    cols = st.columns(len(providers))
+    for col, (provider, desc) in zip(cols, providers.items()):
+        col.markdown(f"""
+        <div style="background-color: white; padding: 15px; border-radius: 10px; border: 1px solid #e0e3e9; height: 100px; text-align: center;">
+            <h5 style="color: #0e1117; margin-bottom: 10px;">{provider}</h5>
+            <p style="color: #666; font-size: 0.9em;">{desc}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 elif pdf and api_key:
     # Reset vector store if new document is uploaded
