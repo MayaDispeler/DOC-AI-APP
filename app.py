@@ -11,6 +11,10 @@ from streamlit_extras.colored_header import colored_header
 from streamlit_extras.add_vertical_space import add_vertical_space
 import os
 from datetime import datetime
+from pdf2image import convert_from_bytes
+import tempfile
+from PIL import Image
+import io
 
 # ======================
 # APP CONFIGURATION
@@ -204,32 +208,43 @@ with st.sidebar:
             pdf.size / (1024 * 1024)
         ), unsafe_allow_html=True)
         
-        # Add a simple page count display
         try:
-            pdf_reader = PdfReader(pdf)
-            page_count = len(pdf_reader.pages)
-            st.markdown(f"""
-            <div style="background-color: #f8f9fa; padding: 0.75rem; border-radius: 8px; text-align: center; margin-bottom: 1rem;">
-                <span style="color: #666; font-size: 0.9rem;">📑 {page_count} pages</span>
+            # Convert first two pages to images
+            pdf_bytes = pdf.read()
+            images = convert_from_bytes(pdf_bytes, first_page=1, last_page=2)
+            
+            # Create a container for the preview
+            st.markdown("""
+            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <h4 style="color: #2c3e50; margin-bottom: 0.5rem;">Preview</h4>
             </div>
             """, unsafe_allow_html=True)
             
-            # Add processing status
-            if st.session_state.document_processed:
-                status_color = "#4CAF50"  # Green
-                status_text = "Ready for analysis"
-            else:
-                status_color = "#FFC107"  # Yellow
-                status_text = "Processing..."
+            # Display each page
+            for i, image in enumerate(images):
+                # Convert PIL image to bytes
+                img_byte_arr = io.BytesIO()
+                image.save(img_byte_arr, format='PNG')
+                img_byte_arr = img_byte_arr.getvalue()
+                
+                # Display image with page number
+                st.image(img_byte_arr, caption=f"Page {i+1}", use_column_width=True)
+                
+                # Add a subtle separator between pages
+                if i < len(images) - 1:
+                    st.markdown("<hr style='margin: 0.5rem 0; border: 0.5px solid #e0e3e9;'>", unsafe_allow_html=True)
             
+            # Show total page count
+            pdf_reader = PdfReader(pdf)
+            page_count = len(pdf_reader.pages)
             st.markdown(f"""
-            <div style="background-color: {status_color}10; padding: 0.75rem; border-radius: 8px; text-align: center; margin-bottom: 1rem; border: 1px solid {status_color}30;">
-                <span style="color: {status_color}; font-size: 0.9rem;">{status_text}</span>
+            <div style="background-color: #f8f9fa; padding: 0.75rem; border-radius: 8px; text-align: center; margin-top: 1rem;">
+                <span style="color: #666; font-size: 0.9rem;">📑 Showing 2 of {page_count} pages</span>
             </div>
             """, unsafe_allow_html=True)
             
         except Exception as e:
-            st.error("⚠️ Could not read PDF page count")
+            st.error(f"⚠️ Could not generate preview: {str(e)}")
     
     if pdf:
         if st.button("🔄 Clear Chat History"):
