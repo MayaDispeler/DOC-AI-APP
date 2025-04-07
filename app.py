@@ -10,6 +10,7 @@ from streamlit_extras.row import row
 from streamlit_extras.colored_header import colored_header
 from streamlit_extras.add_vertical_space import add_vertical_space
 import os
+from datetime import datetime
 
 # ======================
 # APP CONFIGURATION
@@ -134,8 +135,6 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 if 'current_doc' not in st.session_state:
     st.session_state.current_doc = None
-if 'pdf_pages' not in st.session_state:
-    st.session_state.pdf_pages = []
 
 # ======================
 # SIDEBAR CONFIGURATION
@@ -182,6 +181,55 @@ with st.sidebar:
     # Document Upload
     st.markdown("### 📄 Upload Document")
     pdf = st.file_uploader("Upload a PDF file", type="pdf")
+    
+    if pdf:
+        # Add PDF preview section
+        st.markdown("### 📑 Document Preview")
+        
+        # Create a clean preview container
+        st.markdown("""
+        <div style="background-color: white; padding: 1rem; border-radius: 10px; border: 1px solid #e0e3e9; margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.2rem; margin-right: 0.5rem;">📄</span>
+                <span style="font-weight: 500; color: #2c3e50;">{}</span>
+            </div>
+            <div style="color: #666; font-size: 0.9rem;">
+                <span style="display: inline-block; margin-right: 1rem;">📅 Uploaded: {}</span>
+                <span style="display: inline-block;">📏 Size: {:.1f} MB</span>
+            </div>
+        </div>
+        """.format(
+            pdf.name,
+            datetime.now().strftime("%Y-%m-%d %H:%M"),
+            pdf.size / (1024 * 1024)
+        ), unsafe_allow_html=True)
+        
+        # Add a simple page count display
+        try:
+            pdf_reader = PdfReader(pdf)
+            page_count = len(pdf_reader.pages)
+            st.markdown(f"""
+            <div style="background-color: #f8f9fa; padding: 0.75rem; border-radius: 8px; text-align: center; margin-bottom: 1rem;">
+                <span style="color: #666; font-size: 0.9rem;">📑 {page_count} pages</span>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Add processing status
+            if st.session_state.document_processed:
+                status_color = "#4CAF50"  # Green
+                status_text = "Ready for analysis"
+            else:
+                status_color = "#FFC107"  # Yellow
+                status_text = "Processing..."
+            
+            st.markdown(f"""
+            <div style="background-color: {status_color}10; padding: 0.75rem; border-radius: 8px; text-align: center; margin-bottom: 1rem; border: 1px solid {status_color}30;">
+                <span style="color: {status_color}; font-size: 0.9rem;">{status_text}</span>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        except Exception as e:
+            st.error("⚠️ Could not read PDF page count")
     
     if pdf:
         if st.button("🔄 Clear Chat History"):
@@ -299,13 +347,8 @@ elif pdf and api_key:
             try:
                 pdf_reader = PdfReader(pdf)
                 text = ""
-                st.session_state.pdf_pages = []
-                
-                # Extract text and store pages for preview
                 for page in pdf_reader.pages:
-                    page_text = page.extract_text() or ""
-                    text += page_text
-                    st.session_state.pdf_pages.append(page_text)
+                    text += page.extract_text() or ""
                 
                 if not text.strip():
                     st.error("⚠️ The PDF appears to be empty or contains no extractable text.")
@@ -329,107 +372,107 @@ elif pdf and api_key:
             except Exception as e:
                 st.error(f"⚠️ Error processing document: {str(e)}")
                 st.stop()
-
-    # Add PDF preview and navigation
-    if st.session_state.pdf_pages:
-        st.markdown("### 📄 Document Preview")
-        
-        # Create tabs for different views
-        preview_tab, chat_tab = st.tabs(["📑 Document Preview", "💬 Chat"])
-        
-        with preview_tab:
-            # Add page navigation
-            col1, col2 = st.columns([1, 3])
-            
-            with col1:
-                st.markdown("#### 📑 Pages")
-                page_number = st.number_input(
-                    "Go to page",
-                    min_value=1,
-                    max_value=len(st.session_state.pdf_pages),
-                    value=1,
-                    step=1
-                )
-                
-                # Add page thumbnails
-                st.markdown("#### 📋 Quick Navigation")
-                for i in range(len(st.session_state.pdf_pages)):
-                    if st.button(f"Page {i+1}", key=f"page_{i}"):
-                        page_number = i + 1
-            
-            with col2:
-                # Display current page content
-                st.markdown("#### Page Content")
+    
+    # Configure AI Models
+    litellm.drop_params = True
+    model_map = {
+        "OpenAI": "gpt-4o",  # Using the latest GPT-4 model
+        "DeepSeek": "deepseek-R1",
+        "Claude": "claude-3-7-sonnet-20250219",
+        "Google": "google/gemma-2-9b-it",
+        "Mistral": "mistral/mistral-large-latest"
+    }
+    
+    # Display Chat History
+    st.markdown("### 💬 Chat History")
+    for message in st.session_state.chat_history:
+        with st.container():
+            if message["role"] == "user":
                 st.markdown(f"""
-                <div style="background-color: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e3e9; max-height: 500px; overflow-y: auto;">
-                    {st.session_state.pdf_pages[page_number-1]}
+                <div class="chat-message user">
+                    <div class="message">{message["content"]}</div>
+                    <div class="avatar">👤</div>
                 </div>
                 """, unsafe_allow_html=True)
-        
-        with chat_tab:
-            # Display Chat History
-            st.markdown("### 💬 Chat History")
-            for message in st.session_state.chat_history:
-                with st.container():
-                    if message["role"] == "user":
-                        st.markdown(f"""
-                        <div class="chat-message user">
-                            <div class="message">{message["content"]}</div>
-                            <div class="avatar">👤</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    else:
-                        content = message["content"].strip()
-                        st.markdown(f"""
-                        <div class="chat-message assistant">
-                            <div class="message">{content}</div>
-                            <div class="avatar">🤖</div>
-                            {f'<div class="source">{message.get("source", "No source context available")}</div>' if message.get("source") else ""}
-                        </div>
-                        """, unsafe_allow_html=True)
-            
-            # Chat Input
-            query = st.chat_input("Ask a question about the document...")
-            
-            if query:
-                # Add user message to chat history
-                st.session_state.chat_history.append({"role": "user", "content": query})
+            else:
+                # Clean and format the message content
+                content = message["content"]
+                # Remove any HTML artifacts
+                content = content.replace("</div>", "").replace("<div>", "").replace("</div", "").strip()
+                if content.endswith(">"):
+                    content = content.rsplit(">", 1)[0].strip()
                 
-                with st.spinner("🤔 Thinking..."):
-                    try:
-                        # Configure LLM based on provider
-                        if provider == "OpenAI":
-                            llm = ChatOpenAI(
-                                model_name=model_map[provider],
-                                openai_api_key=api_key,
-                                temperature=0.7
-                            )
-                        else:
-                            llm = litellm.completion(
-                                model=f"{provider.lower()}/{model_map[provider]}",
-                                messages=[{"role": "user", "content": query}],
-                                api_key=api_key
-                            )
-                        
-                        qa_chain = RetrievalQA.from_chain_type(
-                            llm=llm,
-                            chain_type="stuff",
-                            retriever=st.session_state.vector_store.as_retriever()
-                        )
-                        
-                        result = qa_chain.invoke({"query": query})
-                        
-                        # Add AI response to chat history
-                        st.session_state.chat_history.append({
-                            "role": "assistant",
-                            "content": result["result"],
-                            "source": result.get("source_text", "")
-                        })
-                        
-                        # Rerun to update the chat display
-                        st.rerun()
-                        
-                    except Exception as e:
-                        st.error(f"⚠️ Error: {str(e)}. Please check your API key and try again.")
+                # Format as table if it contains DIN information
+                if "following" in content.lower() and any(x in content.lower() for x in ["din", "director"]):
+                    lines = content.split('\n')
+                    formatted_content = []
+                    for line in lines:
+                        line = line.strip()
+                        if '-' in line and not line.startswith('|'):
+                            # Format as table row
+                            name, din = line.split('-', 1)
+                            formatted_content.append(f"| {name.strip()} | {din.strip()} |")
+                        elif line and not line.startswith('|'):
+                            formatted_content.append(line)
+                    
+                    if formatted_content:
+                        content = "| Name | DIN |\n|------|-----|\n" + "\n".join(formatted_content)
+
+                st.markdown(f"""
+                <div class="chat-message assistant">
+                    <div class="message">{content}</div>
+                    <div class="avatar">🤖</div>
+                    {f'<div class="source">{message.get("source", "No source context available")}</div>' if message.get("source") else ""}
+                </div>
+                """, unsafe_allow_html=True)
+    
+    # Chat Input
+    query = st.chat_input("Ask a question about the document...")
+    
+    if query:
+        # Add user message to chat history
+        st.session_state.chat_history.append({"role": "user", "content": query})
+        
+        with st.spinner("🤔 Thinking..."):
+            try:
+                # Configure LLM based on provider
+                if provider == "OpenAI":
+                    llm = ChatOpenAI(
+                        model_name=model_map[provider],
+                        openai_api_key=api_key,
+                        temperature=0.7
+                    )
+                else:
+                    llm = litellm.completion(
+                        model=f"{provider.lower()}/{model_map[provider]}",
+                        messages=[{"role": "user", "content": query}],
+                        api_key=api_key
+                    )
+                
+                qa_chain = RetrievalQA.from_chain_type(
+                    llm=llm,
+                    chain_type="stuff",
+                    retriever=st.session_state.vector_store.as_retriever()
+                )
+                
+                result = qa_chain.invoke({"query": query})
+                
+                # Clean and format the response
+                response_text = result["result"]
+                # Remove any HTML tags and clean up the text
+                response_text = response_text.replace("</div>", "").replace("<div>", "").strip()
+                
+                # Add AI response to chat history
+                st.session_state.chat_history.append({
+                    "role": "assistant",
+                    "content": response_text,
+                    "source": result.get("source_text", "")
+                })
+                
+                # Rerun to update the chat display
+                st.rerun()
+                
+            except Exception as e:
+                st.error(f"⚠️ Error: {str(e)}. Please check your API key and try again.")
 else:
     st.warning("👆 Please provide both a PDF document and an API key to start chatting.")
